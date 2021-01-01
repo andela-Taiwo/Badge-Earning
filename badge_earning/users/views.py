@@ -4,6 +4,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView, UpdateView
+from django.shortcuts import render, redirect
+from rest_auth.views import LoginView
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 User = get_user_model()
 
@@ -48,3 +53,22 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+# Create your views here.
+@api_view()
+def django_rest_auth_null():
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view()
+def complete_view(request):
+    return Response("Email account is activated")
+
+class CustomLoginView(LoginView):
+    # import pdb; pdb.set_trace()
+    def get_response(self):
+        print('I got here >>>>>>>>>>>>>>')
+        orginal_response = super().get_response()
+        print(orginal_response, '$$$$$$$$$$$$$$$$$$$$$$$$$$')
+        mydata = {"message": "some message", "status": "success"}
+        orginal_response.data.update(mydata)
+        return orginal_response

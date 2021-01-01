@@ -53,8 +53,12 @@ services:
   mailhog:
     image: mailhog/mailhog:v1.0.0
     container_name: mailhog
+    expose:
+      - 1025
+      - 8025
     ports:
-      - "8025:8025"
+      - '1025:1025'
+      - '8025:8025'
 
   redis:
     image: redis:5.0
