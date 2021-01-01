@@ -1,16 +1,17 @@
 """
 Base settings to build other settings files upon.
 """
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import environ
-from datetime import datetime, timedelta
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # badge_earning/
 APPS_DIR = ROOT_DIR / "badge_earning"
 env = environ.Env()
 
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
 if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
@@ -66,14 +67,15 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
+    "django_celery_beat",
     "rest_framework",
     "rest_framework.authtoken",
-    'rest_auth',
+    "dj_rest_auth",
     "allauth",
     "allauth.account",
+    "dj_rest_auth.registration",
     "allauth.socialaccount",
-    'rest_auth.registration',
-    "django_celery_beat",
+    "allauth.socialaccount.providers.google",
     "corsheaders",
 ]
 
@@ -257,13 +259,82 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
+
+SITE_URL = env("FRONTEND_URL", default="http://127.0.0.1:8000")
+# rest-auth
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+LOGIN_URL = env("FRONTEND_URL", default="") + "/app/login"
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = LOGIN_URL
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = LOGIN_URL
+ACCOUNT_PASSWORD_RESET_CONFIRM = LOGIN_URL + "password-reset/confirm/"
+
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+ACCOUNT_ADAPTER = "users.adapters.AccountAdapter"
+# https://django-allauth.readthedocs.io/en/latest/configuration.html
+SOCIALACCOUNT_ADAPTER = "badge_earning.users.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "offline",
+        },
+    }
+}
+LOGIN_REDIRECT_URL = "/"
+
+
+# django-rest-framework
+# -------------------------------------------------------------------------------
+# django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
+REST_USE_JWT = True
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    "REGISTER_SERIALIZER": "users.serializers.RegisterSerializerCustom",
+}
+REST_AUTH_SERIALIZERS = {
+    "USER_DETAILS_SERIALIZER": "users.serializers.UserSerializer",
+    "PASSWORD_RESET_SERIALIZER": "users.serializers.PasswordSerializer",
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": False,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# CORS_URLS_REGEX = r"^/api/.*$"
+CORS_ALLOW_CREDENTIALS = True
 # Celery
 # ------------------------------------------------------------------------------
 if USE_TZ:
     # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-timezone
     CELERY_TIMEZONE = TIME_ZONE
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-broker_url
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default='')
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="")
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-result_backend
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-accept_content
@@ -305,32 +376,21 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 REST_USE_JWT = True
 
 REST_AUTH_REGISTER_SERIALIZERS = {
-        'REGISTER_SERIALIZER': 'badge_earning.users.serializers.RegisterSerializerCustom',
+    "REGISTER_SERIALIZER": "badge_earning.users.serializers.RegisterSerializerCustom",
 }
 REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'badge_earning.users.serializers.UserSerializer',
-    'PASSWORD_RESET_SERIALIZER': 'badge_earning.users.serializers.PasswordSerializer',
+    "USER_DETAILS_SERIALIZER": "badge_earning.users.serializers.UserSerializer",
+    "PASSWORD_RESET_SERIALIZER": "badge_earning.users.serializers.PasswordSerializer",
 }
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        # "rest_framework.authentication.TokenAuthentication",
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
-# JWT_AUTH = {
-#     'JWT_SECRET_KEY': 'salt347874',
-#     'JWT_ALGORITHM': 'HS256',
-#     'JWT_VERIFY': True,
-#     'JWT_VERIFY_EXPIRATION': True,
-#     'JWT_EXPIRATION_DELTA': timedelta(days=7),
-#     'JWT_ALLOW_REFRESH': True,
-#     'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=7),
-#     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-# }
+
 
 REST_SESSION_LOGIN = False
 

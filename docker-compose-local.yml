@@ -35,20 +35,20 @@ services:
     env_file:
       - ./.envs/.local/.postgres
 
-  docs:
-    image: badge_earning_local_docs
-    container_name: docs
-    build:
-      context: .
-      dockerfile: ./compose/local/docs/Dockerfile
-    env_file:
-      - ./.envs/.local/.django
-    volumes:
-      - ./docs:/docs
-      - ./config:/app/config
-      - ./badge_earning:/app/badge_earning
-    ports:
-      - "7000:7000"
+  # docs:
+  #   image: badge_earning_local_docs
+  #   container_name: docs
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/local/docs/Dockerfile
+  #   env_file:
+  #     - ./.envs/.local/.django
+  #   volumes:
+  #     - ./docs:/docs
+  #     - ./config:/app/config
+  #     - ./badge_earning:/app/badge_earning
+  #   ports:
+  #     - "7000:7000"
 
   mailhog:
     image: mailhog/mailhog:v1.0.0
