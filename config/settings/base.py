@@ -277,7 +277,7 @@ ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = LOGIN_URL
 ACCOUNT_PASSWORD_RESET_CONFIRM = LOGIN_URL + "password-reset/confirm/"
 
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_ADAPTER = "users.adapters.AccountAdapter"
+ACCOUNT_ADAPTER = "badge_earning.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 SOCIALACCOUNT_ADAPTER = "badge_earning.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {
@@ -300,11 +300,11 @@ LOGIN_REDIRECT_URL = "/"
 REST_USE_JWT = True
 
 REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": "users.serializers.RegisterSerializerCustom",
+    "REGISTER_SERIALIZER": "badge_earning.users.serializers.RegisterSerializerCustom",
 }
 REST_AUTH_SERIALIZERS = {
-    "USER_DETAILS_SERIALIZER": "users.serializers.UserSerializer",
-    "PASSWORD_RESET_SERIALIZER": "users.serializers.PasswordSerializer",
+    "USER_DETAILS_SERIALIZER": "badge_earning.users.serializers.UserSerializer",
+    "PASSWORD_RESET_SERIALIZER": "badge_earning.users.serializers.PasswordSerializer",
 }
 
 REST_FRAMEWORK = {
@@ -385,12 +385,11 @@ REST_AUTH_SERIALIZERS = {
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
-
 
 REST_SESSION_LOGIN = False
 

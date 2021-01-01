@@ -3,6 +3,7 @@ from allauth.account.forms import ResetPasswordForm
 from allauth.account.utils import setup_user_email
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import PasswordResetSerializer, UserDetailsSerializer
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -54,70 +55,62 @@ class RegisterSerializerCustom(RegisterSerializer):
         return user
 
 
-class UserSerializer(UserDetailsSerializer):
-    phone = serializers.CharField(source="profile.phone", required=False)
-    mobile_phone = serializers.CharField(source="profile.mobile_phone", required=False)
-    address_1 = serializers.CharField(source="profile.address_1", required=False)
-    address_2 = serializers.CharField(source="profile.address_2", required=False)
-    city = serializers.CharField(source="profile.city", required=False)
-    zipcode = serializers.CharField(source="profile.zipcode", required=False)
-    country = serializers.CharField(source="profile.country", required=False)
-    avatar_url = serializers.CharField(source="profile.avatar_url", required=False)
-    last_name = serializers.CharField(source="profile.last_name", required=False)
-    first_name = serializers.CharField(source="profile.first_name", required=False)
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        field = "__all__"
+        exclude = ["created_at"]
+
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
 
     class Meta(UserDetailsSerializer.Meta):
-        fields = UserDetailsSerializer.Meta.fields + (
-            "avatar_url",
-            "last_name",
-            "first_name",
-            "phone",
-            "mobile_phone",
-            "address_1",
-            "address_2",
-            "city",
-            "zipcode",
-            "country",
-        )
+        model = get_user_model()
+        fields = ("email", "profile")
 
     def update(self, instance, validated_data):
-        profile_data = validated_data.pop("profile", {})
-        phone = profile_data.get("phone")
-        mobile_phone = profile_data.get("mobile_phone")
-        address_1 = profile_data.get("address_1")
-        address_2 = profile_data.get("address_2")
-        zipcode = profile_data.get("zipcode")
-        city = profile_data.get("city")
-        country = profile_data.get("country")
-        avatar_url = profile_data.get("avatar_url")
-        last_name = profile_data.get("last_name")
-        first_name = profile_data.get("first_name")
-
-        instance = super(UserSerializer, self).update(instance, validated_data)
-
-        # get and update user profile
+        profile_data = validated_data.pop("profile", None)
         profile = instance.profile
-        if profile_data:
-            profile.phone = phone if phone else profile.phone
+        if profile_data is not None:
+            phone = profile_data.get("phone")
+            mobile_phone = profile_data.get("mobile_phone")
+            address_1 = profile_data.get("address_1")
+            address_2 = profile_data.get("address_2")
+            zipcode = profile_data.get("zipcode")
+            city = profile_data.get("city")
+            country = profile_data.get("country")
+            profile_picture_url = profile_data.get("profile_picture_url")
+            last_name = profile_data.get("last_name")
+            first_name = profile_data.get("first_name")
+
+            profile.phone = phone if phone is not None else profile.phone
             profile.mobile_phone = (
-                mobile_phone if mobile_phone else profile.mobile_phone
+                mobile_phone if mobile_phone is not None else profile.mobile_phone
             )
-            profile.address_1 = address_1 if address_1 else profile.address_1
-            profile.address_2 = address_2 if address_2 else profile.address_2
-            profile.zipcode = zipcode if zipcode else profile.zipcode
-            profile.city = city if city else profile.city
-            profile.country = country if country else profile.country
+            profile.address_1 = (
+                address_1 if address_1 is not None else profile.address_1
+            )
+            profile.address_2 = (
+                address_2 if address_2 is not None else profile.address_2
+            )
+            profile.zipcode = zipcode if zipcode is not None else profile.zipcode
+            profile.city = city if city is not None else profile.city
+            profile.country = country if country is not None else profile.country
             profile.last_name = (
                 last_name if last_name is not None else profile.last_name
             )
             profile.first_name = (
                 first_name if first_name is not None else profile.first_name
             )
-            profile.avatar_url = (
-                avatar_url if avatar_url is not None else profile.avatar_url
+            profile.profile_picture_url = (
+                profile_picture_url
+                if profile_picture_url is not None
+                else profile.profile_picture_url
             )
             profile.save()
-        return instance
+        return super().update(instance, validated_data)
+        # return super().update(profile, validated_data)
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -129,7 +122,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
         data["user"] = {
-            "avatar_url": self.user.profile.avatar_url,
+            "profile_picture_url": self.user.profile.profile_picture_url,
             "first_name": self.user.profile.first_name,
             "last_name": self.user.profile.last_name,
         }
@@ -141,18 +134,18 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class ViewProfileSerializer(serializers.ModelSerializer):
-    profile_picture = serializers.SerializerMethodField(read_only=True)
+    profile_picture_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Profile
         field = "__all__"
         exclude = ["created_at"]
-        read_only_fields = ["profile_picture"]
+        read_only_fields = ["profile_picture_name"]
 
-    def get_profile_picture(self, Profile):
+    def get_profile_picture_name(self, Profile):
 
-        if Profile.profile_picture is not None:
-            return Profile.profile_picture.values(
+        if Profile.profile_picture_name is not None:
+            return Profile.profile_picture_name.values(
                 "profile_picture_url", "profile_picture_key"
             )
         return []

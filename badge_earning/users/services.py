@@ -9,4 +9,5 @@ def update_user(requestor, user_id, data):
     serializer = UserSerializer(user, data=data, partial=True)
     if serializer.is_valid(raise_exception=True):
         serializer.save()
+    # print(dir(serializer.data))
     return serializer.data
