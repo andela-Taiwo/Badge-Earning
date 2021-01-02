@@ -70,3 +70,21 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+
+# Cors settings
+CORS_ORIGIN_WHITELIST = [
+    env("FRONTEND_URL", default="http://localhost:8000"),
+    env("FRONTEND_URL_LOCAL", default="http://localhost:8000"),
+]
+CORS_ORIGIN_REGEX_WHITELIST = [
+    env("FRONTEND_URL", default="http://localhost:8000"),
+    env("FRONTEND_URL_LOCAL", default="http://localhost:8000"),
+]
+
+FRONTEND_URL = "http://127.0.0.1:8000"
+
+# GOOGLE AUTHORIZATION
+GOOGLE_REDIRECT_URI = env(
+    "GOOGLE_REDIRECT_URI", default="http://localhost:8000/app/auth"
+)
+GOOGLE_SCRET_FILE = env("GOOGLE_SCRET_FILE", default="")

@@ -1,19 +1,29 @@
-from allauth.account.views import ConfirmEmailView, LoginView, SignupView
+from dj_rest_auth.registration.views import (
+    RegisterView,
+    SocialAccountDisconnectView,
+    SocialAccountListView,
+)
 from django.conf import settings
+from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import include, path, re_path
+from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-from rest_auth.registration.views import RegisterView, VerifyEmailView
-from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from badge_earning.users.views import (
-    CustomLoginView,
-    complete_view,
-    django_rest_auth_null,
+    GoogleConnect,
+    GoogleLogin,
+    MyTokenObtainPairView,
+    UserViewSet,
 )
+
+router = DefaultRouter()
+
+router.register(r"user", UserViewSet, basename="apiv1_users")
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -22,31 +32,28 @@ urlpatterns = [
     ),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
-    # User management
-    path("users/", include("badge_earning.users.urls", namespace="users")),
-    path('accounts/', include('allauth.urls')),
-    path('', include('rest_auth.urls')),
-    re_path(r'signup/account-email-verification-sent/', django_rest_auth_null, name='account_email_verification_sent'),
-    path('signup/complete/', complete_view, name='account_confirm_complete'),
-    path('signup/', include('rest_auth.registration.urls')),
-    path('signup/', RegisterView.as_view(), name='custom_signup'),
-    re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/', ConfirmEmailView.as_view(),
-        name='account_confirm_email'),
-    path('login/', CustomLoginView.as_view(), name='custom_login'),
-
-    # Your stuff: custom urls includes go here
+    path("accounts/", include("allauth.urls")),
+    path("dj-rest-auth/", include("dj_rest_auth.urls")),
+    path("login/", MyTokenObtainPairView.as_view(), name="account_login"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("signup/", RegisterView.as_view(), name="account_signup"),
+    path("google/login/", GoogleLogin.as_view(), name="google_login"),
+    path("google/connect/", GoogleConnect.as_view(), name="google_login"),
+    path(
+        "socialaccounts/", SocialAccountListView.as_view(), name="social_account_list"
+    ),
+    path(
+        "socialaccounts/<int:pk>/disconnect/",
+        SocialAccountDisconnectView.as_view(),
+        name="social_account_disconnect",
+    ),
+    path("api/", include("config.api_router")),
+    url(r"^", include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     # Static file serving when using Gunicorn + Uvicorn for local web socket development
     urlpatterns += staticfiles_urlpatterns()
 
-# API URLS
-urlpatterns += [
-    # API base url
-    path("api/", include("config.api_router")),
-    # DRF auth token
-    path("auth-token/", obtain_auth_token),
-]
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit
