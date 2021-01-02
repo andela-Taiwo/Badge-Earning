@@ -36,7 +36,7 @@ class RegisterSerializerCustom(RegisterSerializer):
 
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ("email", "password1", "password2")
 
     def get_cleaned_data(self):
         return {
@@ -110,7 +110,6 @@ class UserSerializer(serializers.ModelSerializer):
             )
             profile.save()
         return super().update(instance, validated_data)
-        # return super().update(profile, validated_data)
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
