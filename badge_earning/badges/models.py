@@ -31,9 +31,7 @@ class Skill(UUIDModel):
 class Owner(UUIDModel):
     name = models.CharField(max_length=200, blank=True, null=True)
     user = models.ForeignKey(
-        User,
-        related_name="%(class)s_owner",
-        on_delete=models.CASCADE,
+        User, related_name="%(class)s_owner", on_delete=models.CASCADE,
     )
 
     def __str__(self):
@@ -41,15 +39,9 @@ class Owner(UUIDModel):
 
 
 class Badge(UUIDModel):
-    users = models.ManyToManyField(
-        User,
-        related_name="%(class)s_badges",
-    )
+    users = models.ManyToManyField(User, related_name="%(class)s_badges",)
     badge_icon = models.ImageField(upload_to="badge_image_icons", blank=True, null=True)
     owner = models.ForeignKey(
         Owner, related_name="%(class)s_owner", on_delete=models.CASCADE
     )
-    skill = models.ManyToManyField(
-        Skill,
-        related_name="%(class)s_skills",
-    )
+    skill = models.ManyToManyField(Skill, related_name="%(class)s_skills",)

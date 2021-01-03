@@ -28,7 +28,7 @@ CACHES = {
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-host
 EMAIL_HOST = env("EMAIL_HOST", default="mailhog")
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
-EMAIL_PORT = '1025'
+EMAIL_PORT = "1025"
 
 EMAIL_USE_TLS = False
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -69,7 +69,7 @@ INSTALLED_APPS += ["django_extensions"]  # noqa F405
 CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672//"
 
 # Cors settings
 CORS_ORIGIN_WHITELIST = [
