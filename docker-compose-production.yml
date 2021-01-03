@@ -62,7 +62,7 @@ services:
     image: badge_earning_production_flower
     command: /start-flower
 
-  
+
   awscli:
     build:
       context: .

@@ -81,7 +81,8 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "badge_earning.users.apps.UsersConfig",
-    # Your stuff: custom apps go here
+    # Your stuff: custom apps go here,
+    "badges",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
