@@ -13,7 +13,6 @@ from .serializers import MyTokenObtainPairSerializer
 
 # Create your views here.
 class UserViewSet(viewsets.ViewSet):
-
     @decorators.action(methods=["put"], detail=False, url_path="profile")
     def update_profile(self, request, **kwargs):
         user = user_service.update_user(
