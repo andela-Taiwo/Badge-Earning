@@ -13,3 +13,8 @@ REDIS_URL=redis://redis:6379/0
 CELERY_FLOWER_USER=debug
 CELERY_FLOWER_PASSWORD=debug
 
+DJANGO_SETTINGS_MODULE=config.settings.local
+DJANGO_SECRET_KEY=DKtMKISk8TslULXSmGOyXOOWiWVnDS4kNlnceM5EroP8hoLoS9oYZW9ZXSzcaEBv
+FRONTEND_URL_LOCAL=http://localhost:8082
+GOOGLE_REDIRECT_URI=http://localhost:8000/app/auth
+GOOGLE_SCRET_FILE=client_secret_992917630684-2nc7uuj1fsr1qithobkdok63sq4ch9mg.apps.googleusercontent.com.json

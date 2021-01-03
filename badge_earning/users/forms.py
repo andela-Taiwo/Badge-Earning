@@ -10,21 +10,17 @@ class UserChangeForm(forms.UserChangeForm):
         model = User
 
 
+class MyUsernameField(forms.UsernameField):
+    def widget_attrs(self, widget):
+        return {
+            **super().widget_attrs(widget),
+            "autocapitalize": "none",
+            "autocomplete": "email",
+        }
+
+
 class UserCreationForm(forms.UserCreationForm):
-
-    error_message = forms.UserCreationForm.error_messages.update(
-        {"duplicate_username": _("This username has already been taken.")}
-    )
-
     class Meta(forms.UserCreationForm.Meta):
         model = User
-
-    def clean_username(self):
-        username = self.cleaned_data["username"]
-
-        try:
-            User.objects.get(username=username)
-        except User.DoesNotExist:
-            return username
-
-        raise ValidationError(self.error_messages["duplicate_username"])
+        fields = ("email",)
+        field_classes = {"email": MyUsernameField}
