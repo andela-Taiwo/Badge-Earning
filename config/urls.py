@@ -1,4 +1,3 @@
-from api import urls
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
@@ -8,6 +7,8 @@ from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
+
+from badge_earning.api import urls
 
 router = DefaultRouter()
 
