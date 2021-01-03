@@ -15,5 +15,5 @@ class UserAdmin(auth_admin.UserAdmin):
     fieldsets = (("User", {"fields": ("lastname",)}),) + auth_admin.UserAdmin.fieldsets
     list_display = ["email", "is_superuser"]
     search_fields = ["email"]
-    ordering = ('email',)
+    ordering = ("email",)
     # pass

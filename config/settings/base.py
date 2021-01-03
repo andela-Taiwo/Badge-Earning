@@ -283,13 +283,8 @@ ACCOUNT_ADAPTER = "badge_earning.users.adapters.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "badge_earning.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
-        "SCOPE": [
-            "profile",
-            "email",
-        ],
-        "AUTH_PARAMS": {
-            "access_type": "offline",
-        },
+        "SCOPE": ["profile", "email",],
+        "AUTH_PARAMS": {"access_type": "offline",},
     }
 }
 LOGIN_REDIRECT_URL = "/"

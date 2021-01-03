@@ -8,8 +8,11 @@ from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
+from utils.serializers import DynamicNonNullSerializer
 
-from badge_earning.users.models import Profile, User
+from badge_earning.users.models import Profile
+
+User = get_user_model()
 
 
 class PasswordSerializer(PasswordResetSerializer):
@@ -55,18 +58,18 @@ class RegisterSerializerCustom(RegisterSerializer):
         return user
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(DynamicNonNullSerializer):
     class Meta:
         model = Profile
         field = "__all__"
         exclude = ["created_at"]
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(DynamicNonNullSerializer):
     profile = ProfileSerializer()
 
     class Meta(UserDetailsSerializer.Meta):
-        model = get_user_model()
+        model = User
         fields = ("email", "profile")
 
     def update(self, instance, validated_data):
